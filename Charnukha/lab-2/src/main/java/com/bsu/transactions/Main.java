@@ -48,8 +48,7 @@ public class Main {
         accountRepo.save(new Account(b2, BigDecimal.valueOf(150)));
 
 
-        SwingUtilities.invokeLater(() -> createUI(userRepo, accountService, txService));
-
+        SwingUtilities.invokeLater(() -> createUI(userRepo, accountService, engine));
         Runtime.getRuntime().addShutdownHook(new Thread(engine::shutdown));
     }
 
@@ -113,8 +112,9 @@ public class Main {
     }
 
 
-    private static void createUI(InMemoryUserRepository userRepo, AccountService accountService, TransactionService txService) {
-
+    private static void createUI(InMemoryUserRepository userRepo,
+                                 AccountService accountService,
+                                 TransactionEngine engine) {
 
         JFrame frame = new JFrame("Bank Transactions Demo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -347,10 +347,19 @@ public class Main {
                 java.util.UUID accountId = (java.util.UUID) accountBox.getSelectedItem();
                 if (accountId == null) { logArea.append("No account selected\n"); return; }
                 Transaction tx = new Transaction(java.util.UUID.randomUUID(), Instant.now(), TransactionType.DEPOSIT, amount, accountId, null);
-                txService.processTransaction(tx);
-                logArea.append(Instant.now() + "  Deposited " + amount + " to account " + accountId + "\n");
 
-                refreshUI(userBox, targetUserBox, accountBox, targetAccountBox, userRepo);
+                engine.submit(tx)
+                        .thenRun(() -> SwingUtilities.invokeLater(() -> {
+                            logArea.append(Instant.now() + "  Deposited " + amount + " to account " + accountId + "\n");
+                            refreshUI(userBox, targetUserBox, accountBox, targetAccountBox, userRepo);
+                        }))
+                        .exceptionally(ex -> {
+                            SwingUtilities.invokeLater(() ->
+                                    logArea.append("Error processing deposit: " + ex.getCause().getMessage() + "\n")
+                            );
+                            return null;
+                        });
+
             } catch (NumberFormatException nfe) {
                 logArea.append("Error: invalid number\n");
             } catch (Exception ex) {
@@ -365,10 +374,19 @@ public class Main {
                 java.util.UUID accountId = (java.util.UUID) accountBox.getSelectedItem();
                 if (accountId == null) { logArea.append("No account selected\n"); return; }
                 Transaction tx = new Transaction(java.util.UUID.randomUUID(), Instant.now(), TransactionType.WITHDRAW, amount, accountId, null);
-                txService.processTransaction(tx);
-                logArea.append(Instant.now() + "  Withdrew " + amount + " from account " + accountId + "\n");
 
-                refreshUI(userBox, targetUserBox, accountBox, targetAccountBox, userRepo);
+                engine.submit(tx)
+                        .thenRun(() -> SwingUtilities.invokeLater(() -> {
+                            logArea.append(Instant.now() + "  Withdrew " + amount + " from account " + accountId + "\n");
+                            refreshUI(userBox, targetUserBox, accountBox, targetAccountBox, userRepo);
+                        }))
+                        .exceptionally(ex -> {
+                            SwingUtilities.invokeLater(() ->
+                                    logArea.append("Error processing withdraw: " + ex.getCause().getMessage() + "\n")
+                            );
+                            return null;
+                        });
+
             } catch (NumberFormatException nfe) {
                 logArea.append("Error: invalid number\n");
             } catch (Exception ex) {
@@ -385,10 +403,19 @@ public class Main {
                 if (source == null) { logArea.append("No source account selected\n"); return; }
                 if (target == null) { logArea.append("No target account selected\n"); return; }
                 Transaction tx = new Transaction(java.util.UUID.randomUUID(), Instant.now(), TransactionType.TRANSFER, amount, source, target);
-                txService.processTransaction(tx);
-                logArea.append(Instant.now() + "  Transferred " + amount + " from " + source + " to " + target + "\n");
 
-                refreshUI(userBox, targetUserBox, accountBox, targetAccountBox, userRepo);
+                engine.submit(tx)
+                        .thenRun(() -> SwingUtilities.invokeLater(() -> {
+                            logArea.append(Instant.now() + "  Transferred " + amount + " from " + source + " to " + target + "\n");
+                            refreshUI(userBox, targetUserBox, accountBox, targetAccountBox, userRepo);
+                        }))
+                        .exceptionally(ex -> {
+                            SwingUtilities.invokeLater(() ->
+                                    logArea.append("Error processing transfer: " + ex.getCause().getMessage() + "\n")
+                            );
+                            return null;
+                        });
+
             } catch (NumberFormatException nfe) {
                 logArea.append("Error: invalid number\n");
             } catch (Exception ex) {
