@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>🌸 Kawaii Anime Clicker 🌸</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="animated-bg"></div>
+
+<div class="game-card">
+    <div class="stats">
+        <div class="level-badge">Уровень <span id="level-val">1</span></div>
+        <h1 id="click-count">0</h1>
+        <p class="happiness-text">  кликов счастья ✨</p>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <p class="goal-text">До новой тяночки: <span id="clicks-left">25</span></p>
+
+    <div class="main-clicker" onclick="makeClick(event)">
+        <img src="girl1.png" alt="Anime Girl" id="anime-img">
+    </div>
+
+    <div class="shop">
+        <button class="collection-btn" onclick="openCollection()">Коллекция 📸</button>
+        <p id="collection-count">Разблокировано: 1/6</p>
+    </div>
+</div>
+
+<div id="collection-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeCollection()">&times;</span>
+        <h2 style="color: #ff85c0;">🌸 Твоя коллекция 🌸</h2>
+        <div id="gallery" class="gallery-grid"></div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

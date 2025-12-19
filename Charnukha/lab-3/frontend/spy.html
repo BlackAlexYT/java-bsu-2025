@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>🕵️ ШПИОНСКИЙ ВЗЛОМ</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .hacker-box { border: 2px solid #0f0; padding: 20px; text-align: center; background: rgba(0, 50, 0, 0.9); box-shadow: 0 0 20px #0f0; border-radius: 10px; }
+        button { background: #0f0; color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #0a0; }
+        .log { margin-top: 20px; font-size: 0.8rem; color: #888; width: 300px; text-align: left; }
+    </style>
+</head>
+<body>
+<div class="hacker-box">
+    <h1>[ СИСТЕМА ПЕРЕХВАТА ]</h1>
+    <p>Попытка удаленного взлома счетчика кликов...</p>
+    <button onclick="stealClicks()">ВЗЛОМАТЬ LOCALHOST:8080</button>
+    <div id="status" style="margin-top: 15px;">Ожидание...</div>
+    <div class="log" id="log"></div>
+</div>
+
+<script>
+    async function stealClicks() {
+        const status = document.getElementById('status');
+        const log = document.getElementById('log');
+        status.innerText = "ОТПРАВКА ЗАПРОСА...";
+        log.innerHTML += "> Попытка POST на http://localhost:8080/api/clicks/increment<br>";
+
+        try {
+            const response = await fetch('http://localhost:8080/api/clicks/increment', { method: 'POST' });
+            if (response.ok) {
+                status.innerText = "УСПЕХ: CORS ПРОБИТ!";
+                status.style.color = "red";
+            } else {
+                status.innerText = "ОШИБКА: СЕРВЕР ОТКЛОНИЛ";
+            }
+        } catch (err) {
+            status.innerText = "ЗАБЛОКИРОВАНО CORS 🛡️";
+            status.style.color = "#0f0";
+            log.innerHTML += `<span style="color:red">> Ошибка: ${err.message}</span><br>`;
+            log.innerHTML += "> Браузер заблокировал запрос из-за политики CORS.<br>";
+        }
+    }
+</script>
+</body>
+</html>
